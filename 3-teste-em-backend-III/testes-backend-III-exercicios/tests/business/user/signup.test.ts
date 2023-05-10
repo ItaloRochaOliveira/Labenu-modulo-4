@@ -1,0 +1,68 @@
+import { ZodError } from "zod";
+import { UserBusiness } from "../../../src/business/UserBusiness";
+import { SignupSchema } from "../../../src/dtos/user/signup.dto";
+import { BadRequestError } from "../../../src/errors/BadRequestError";
+import { HashManagerMock } from "../../mocks/HashManagerMock";
+import { IdGeneratorMock } from "../../mocks/IdGeneratorMock";
+import { TokenManagerMock } from "../../mocks/TokenManagerMock";
+import { UserDatabaseMock } from "../../mocks/UserDatabaseMock";
+
+describe("Testando signup", () => {
+  const userBusiness = new UserBusiness(
+    new UserDatabaseMock(),
+    new IdGeneratorMock(),
+    new TokenManagerMock(),
+    new HashManagerMock()
+  );
+
+  test("deve gerar token ao cadastrar", async () => {
+    const input = SignupSchema.parse({
+      name: "Ciclana",
+      email: "ciclana@email.com",
+      password: "ciclana321",
+    });
+
+    const output = await userBusiness.signup(input);
+
+    expect(output).toEqual({
+      message: "Cadastro realizado com sucesso",
+      token: "token-mock",
+    });
+  });
+
+  test("Deve disparar erro de DTO", async () => {
+    expect.assertions(1);
+    try {
+      const input = SignupSchema.parse({
+        name: "Ciclana",
+        email: "",
+        password: "ciclana321",
+      });
+
+      const output = await userBusiness.signup(input);
+    } catch (erro) {
+      if (erro instanceof ZodError) {
+        console.log(erro.issues);
+        expect(erro.issues[0].message).toBe("Invalid email");
+      }
+    }
+  });
+
+  test("Erro se email já existe", async () => {
+    expect.assertions(2);
+    try {
+      const input = SignupSchema.parse({
+        name: "Ciclana",
+        email: "fulano@email.com",
+        password: "ciclana321",
+      });
+
+      const output = await userBusiness.signup(input);
+    } catch (erro) {
+      if (erro instanceof BadRequestError) {
+        expect(erro.message).toBe("email já existe");
+        expect(erro.statusCode).toBe(400);
+      }
+    }
+  });
+});
