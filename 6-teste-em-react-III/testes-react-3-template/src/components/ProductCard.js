@@ -37,28 +37,28 @@ const Image = styled.img`
 `;
 
 const ProductCard = () => {
-    const [productData, setProductData] = useState(null);
+  const [productData, setProductData] = useState(null);
 
-    useEffect(() => {
-        axios.get("https://dummyjson.com/products/6").then((response) => {
-            setProductData(response.data);
-        });
-    }, []);
+  useEffect(() => {
+    axios.get("https://dummyjson.com/products/6").then((response) => {
+      setProductData(response.data);
+    });
+  }, []);
 
-    if (!productData) {
-        return <p>Loading...</p>;
-    }
+  if (!productData) {
+    return <p>Loading...</p>;
+  }
 
-    const { id, title, description, price, thumbnail } = productData;
+  const { id, title, description, price, thumbnail } = productData;
 
-    return (
-        <Container>
-            <Title>{title}</Title>
-            <Image src={thumbnail} alt={`Thumbnail for ${title}`} />
-            <Description>{description}</Description>
-            <Price>${price}</Price>
-        </Container>
-    );
+  return (
+    <Container>
+      <Title>{title}</Title>
+      <Image src={thumbnail} alt={`Thumbnail for ${title}`} />
+      <Description>{description}</Description>
+      <Price>${price}</Price>
+    </Container>
+  );
 };
 
 export default ProductCard;
